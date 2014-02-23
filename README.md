@@ -1,4 +1,5 @@
 pattern-emitter
 ===============
 
-Event emitters with support for wildcard patterns
+Event emitters with support for regular expressions. Inherits from Node's
+EventEmitter.

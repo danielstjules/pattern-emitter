@@ -1,0 +1,22 @@
+{
+    "name": "pattern-emitter",
+    "version": "0.0.1",
+    "description": "Event emitters with support for regular expressions",
+    "keywords": ["pattern", "event", "emitter", "regular", "expression",
+        "regex", "wild", "card"],
+    "author": "Daniel St. Jules <danielst.jules@gmail.com>",
+    "licenses": ["MIT"],
+    "main": "lib/patternEmitter.js",
+    "homepage": "https://github.com/danielstjules/pattern-emitter",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/danielstjules/pattern-emitter.git"
+    },
+    "devDependencies": {
+        "mocha": "*",
+        "expect.js": "*"
+    },
+    "scripts": {
+        "test": "./node_modules/.bin/mocha -R spec spec"
+    }
+}
