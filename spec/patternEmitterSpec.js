@@ -11,7 +11,7 @@ describe('PatternEmitter', function() {
 
   it("inherits EventEmitter's prototype as private methods", function() {
     var methods = ['_addListener', '_removeListener', 'removeAllListeners',
-    '_listeners'];
+      '_listeners'];
 
     methods.forEach(function(method) {
       expect(emitter[method]).to.be.a('function');
@@ -60,6 +60,52 @@ describe('PatternEmitter', function() {
       emitter.emit('test');
 
       expect(invoked).to.be(true);
+    });
+
+    it('invokes the listener with any additional arguments', function() {
+      var args;
+      emitter._events['^t\\w{3}'] = function(arg1, arg2, arg3) {
+        args = [arg1, arg2, arg3];
+      };
+      emitter._regexes['^t\\w{3}'] = new RegExp('^t\\w{3}');
+      emitter.emit('test', 'arg1', 'arg2', 'arg3');
+
+      expect(args).to.eql(['arg1', 'arg2', 'arg3']);
+    });
+
+    it('adds an event property to the invoked listener', function() {
+      var event;
+      emitter._events['^\\w{2}'] = function() {
+        event = this.event;
+      };
+      emitter._regexes['^\\w{2}'] = new RegExp('^\\w{2}');
+      emitter.emit('test');
+
+      expect(event).to.eql('test');
+    });
+
+    it('invokes all matching listeners', function() {
+      var x = 0;
+      var y = 0;
+
+      var listener1 = function() {
+        x++;
+      };
+
+      var listener2 = function() {
+        y++;
+      };
+
+      emitter._events['^t.*'] = listener1;
+      emitter._regexes['^t.*'] = new RegExp('^t.*');
+
+      emitter._events['.*'] = [listener1, listener2];
+      emitter._regexes['.*'] = new RegExp('.*');
+
+      emitter.emit('test');
+
+      expect(x).to.be(2);
+      expect(y).to.be(1);
     });
   });
 
