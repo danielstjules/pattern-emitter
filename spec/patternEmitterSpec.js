@@ -10,7 +10,7 @@ describe('PatternEmitter', function() {
 
   it("inherits EventEmitter's prototype as private methods", function() {
     var methods = ['_addListener', '_removeListener', 'removeAllListeners',
-      '_listeners', '_once'];
+      '_listeners', 'emit', '_once'];
 
     methods.forEach(function(method) {
       expect(emitter[method]).to.be.a('function');
