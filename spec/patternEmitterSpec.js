@@ -403,7 +403,7 @@ describe('PatternEmitter', function() {
     });
   });
 
-  describe('listenerCount', function() {
+  describe('matchingListenerCount', function() {
     it("throws a TypeError if type isn't a string", function() {
       var invalidCall = function() {
         PatternEmitter.matchingListenerCount(1, function() {});
