@@ -1,5 +1,6 @@
 var expect = require('expect.js');
 var PatternEmitter = require('../lib/patternEmitter');
+var EventEmitter = require('events').EventEmitter;
 
 describe('PatternEmitter', function() {
   var emitter;
@@ -8,18 +9,26 @@ describe('PatternEmitter', function() {
     emitter = new PatternEmitter();
   });
 
-  it("inherits EventEmitter's prototype as private methods", function() {
-    var methods = ['_addListener', '_removeListener', 'removeAllListeners',
-      '_listeners', 'emit', '_once'];
+  it("inherits EventEmitter's prototype", function() {
+    var methods = ['addListener', 'removeListener', 'removeAllListeners',
+      'listeners', 'once'];
 
     methods.forEach(function(method) {
-      expect(emitter[method]).to.be.a('function');
+      expect(PatternEmitter.prototype[method]).to.be(EventEmitter.prototype[method]);
     });
+  });
+
+  it('keeps EventEmitter.prototype.emit as a private method', function() {
+    expect(PatternEmitter.prototype._emit).to.be(EventEmitter.prototype.emit);
   });
 
   describe('constructor', function() {
     it('adds an _events property', function() {
       expect(emitter._events).to.eql({});
+    });
+
+    it('adds a _patternEvents property', function() {
+      expect(emitter._patternEvents).to.eql({});
     });
 
     it('adds a _regexes property', function() {
@@ -40,7 +49,7 @@ describe('PatternEmitter', function() {
 
     it('returns false if no listeners match the event', function() {
       var invoked = false;
-      emitter._events['^t.*'] = function() {
+      emitter._patternEvents['^t.*'] = function() {
         invoked = true;
       };
       emitter._regexes['^t.*'] = new RegExp('^t.*');
@@ -52,7 +61,7 @@ describe('PatternEmitter', function() {
 
     it('invokes a listener when the event matches its pattern', function() {
       var invoked = false;
-      emitter._events['^t.*'] = function() {
+      emitter._patternEvents['^t.*'] = function() {
         invoked = true;
       };
       emitter._regexes['^t.*'] = new RegExp('^t.*');
@@ -63,7 +72,7 @@ describe('PatternEmitter', function() {
 
     it('invokes the listener with any additional arguments', function() {
       var args;
-      emitter._events['^t\\w{3}'] = function(arg1, arg2, arg3) {
+      emitter._patternEvents['^t\\w{3}'] = function(arg1, arg2, arg3) {
         args = [arg1, arg2, arg3];
       };
       emitter._regexes['^t\\w{3}'] = new RegExp('^t\\w{3}');
@@ -74,7 +83,7 @@ describe('PatternEmitter', function() {
 
     it('adds an event property to the invoked listener', function() {
       var event;
-      emitter._events['^\\w{2}'] = function() {
+      emitter._patternEvents['^\\w{2}'] = function() {
         event = this.event;
       };
       emitter._regexes['^\\w{2}'] = new RegExp('^\\w{2}');
@@ -95,10 +104,10 @@ describe('PatternEmitter', function() {
         y++;
       };
 
-      emitter._events['^t.*'] = listener1;
+      emitter._patternEvents['^t.*'] = listener1;
       emitter._regexes['^t.*'] = new RegExp('^t.*');
 
-      emitter._events['.*'] = [listener1, listener2];
+      emitter._patternEvents['.*'] = [listener1, listener2];
       emitter._regexes['.*'] = new RegExp('.*');
 
       emitter.emit('test');
@@ -113,7 +122,7 @@ describe('PatternEmitter', function() {
         counter++;
       };
 
-      emitter._events['[t]'] = listener;
+      emitter._patternEvents['[t]'] = listener;
       emitter._regexes['[t]'] = new RegExp('[t]');
 
       emitter.emit('test');
@@ -123,10 +132,10 @@ describe('PatternEmitter', function() {
     });
   });
 
-  describe('prototype.once', function() {
+  describe('prototype.onceOnPattern', function() {
     it("throws a TypeError if pattern isn't a string", function() {
       var invalidCall = function() {
-        emitter.once(1, function() {});
+        emitter.onceOnPattern(1, function() {});
       };
 
       expect(invalidCall).to.throwException(function (e) {
@@ -140,19 +149,19 @@ describe('PatternEmitter', function() {
         counter++;
       };
 
-      emitter.once('[a-z]', listener);
+      emitter.onceOnPattern('[a-z]', listener);
       emitter.emit('test');
       emitter.emit('test');
 
       expect(counter).to.be(1);
-      expect(emitter._events).not.to.have.key('[a-z]');
+      expect(emitter._patternEvents).not.to.have.key('[a-z]');
     });
   });
 
-  describe('prototype.addListener', function() {
+  describe('prototype.addPatternListener', function() {
     it("throws a TypeError if pattern isn't a string", function() {
       var invalidCall = function() {
-        emitter.addListener(1, function() {});
+        emitter.addPatternListener(1, function() {});
       };
 
       expect(invalidCall).to.throwException(function (e) {
@@ -162,7 +171,7 @@ describe('PatternEmitter', function() {
 
     it("throws a TypeError if listener isn't a function", function() {
       var invalidCall = function() {
-        emitter.addListener('test', 'invalid');
+        emitter.addPatternListener('test', 'invalid');
       };
 
       expect(invalidCall).to.throwException(function (e) {
@@ -170,17 +179,17 @@ describe('PatternEmitter', function() {
       });
     });
 
-    it('adds the listener to the _events property', function() {
+    it('adds the listener to the _patternEvents property', function() {
       var listener = function() {};
-      emitter.addListener('test*', listener);
+      emitter.addPatternListener('test*', listener);
 
-      expect(emitter._events).to.have.key('test*');
-      expect(emitter._events['test*']).to.be(listener);
+      expect(emitter._patternEvents).to.have.key('test*');
+      expect(emitter._patternEvents['test*']).to.be(listener);
     });
 
     it('creates a regex and adds it to the _regexes property', function() {
       var pattern = 'test*';
-      emitter.addListener(pattern, function() {});
+      emitter.addPatternListener(pattern, function() {});
 
       expect(emitter._regexes).to.have.key(pattern);
       expect(emitter._regexes[pattern]).to.be.a(RegExp);
@@ -193,34 +202,34 @@ describe('PatternEmitter', function() {
       var listener1 = function() {};
       var listener2 = function() {};
 
-      emitter.addListener(pattern1, listener1);
-      emitter.addListener(pattern2, listener2);
+      emitter.addPatternListener(pattern1, listener1);
+      emitter.addPatternListener(pattern2, listener2);
 
-      expect(emitter._events[pattern1]).to.equal(listener1);
-      expect(emitter._events[pattern2]).to.equal(listener2);
+      expect(emitter._patternEvents[pattern1]).to.equal(listener1);
+      expect(emitter._patternEvents[pattern2]).to.equal(listener2);
     });
 
     it('can add multiple listeners for the same pattern', function() {
       var pattern = 'test*';
-      emitter.addListener(pattern, function() {});
-      emitter.addListener(pattern, function() {});
+      emitter.addPatternListener(pattern, function() {});
+      emitter.addPatternListener(pattern, function() {});
 
-      expect(emitter._events[pattern]).to.have.length(2);
+      expect(emitter._patternEvents[pattern]).to.have.length(2);
     });
 
     it('returns the instance of PatternEmitter', function() {
-      var returned = emitter.addListener('test*', function() {});
+      var returned = emitter.addPatternListener('test*', function() {});
       expect(returned).to.equal(emitter);
     });
   });
 
   describe('prototype.on', function() {
     it('is an alias for prototype.addListener', function() {
-      expect(emitter.on).to.equal(emitter.addListener);
+      expect(emitter.onPattern).to.equal(emitter.addPatternListener);
     });
   });
 
-  describe('prototype.removeListener', function() {
+  describe('prototype.removePatternListener', function() {
     var listeners;
     var patterns = ['pattern1', 'pattern2'];
 
@@ -230,14 +239,14 @@ describe('PatternEmitter', function() {
       patterns.forEach(function(pattern) {
         var listener = function() {};
         listeners.push(listener);
-        emitter._events[pattern] = listener;
+        emitter._patternEvents[pattern] = listener;
         emitter._regexes[pattern] = new RegExp(pattern);
       });
     });
 
     it("throws a TypeError if pattern isn't a string", function() {
       var invalidCall = function() {
-        emitter.removeListener(1, function() {});
+        emitter.removePatternListener(1, function() {});
       };
 
       expect(invalidCall).to.throwException(function (e) {
@@ -247,7 +256,7 @@ describe('PatternEmitter', function() {
 
     it("throws a TypeError if listener isn't a function", function() {
       var invalidCall = function() {
-        emitter.removeListener('test', 'invalid');
+        emitter.removePatternListener('test', 'invalid');
       };
 
       expect(invalidCall).to.throwException(function (e) {
@@ -255,70 +264,70 @@ describe('PatternEmitter', function() {
       });
     });
 
-    it('removes the listener from the _events property', function() {
-      emitter.removeListener(patterns[0], listeners[0]);
+    it('removes the listener from the _patternEvents property', function() {
+      emitter.removePatternListener(patterns[0], listeners[0]);
 
-      expect(emitter._events).not.to.have.key(patterns[0]);
-      expect(emitter._events[patterns[1]]).to.be(listeners[1]);
+      expect(emitter._patternEvents).not.to.have.key(patterns[0]);
+      expect(emitter._patternEvents[patterns[1]]).to.be(listeners[1]);
     });
 
     it("doesn't modify other listeners for the pattern", function() {
-      emitter._events[patterns[0]] = [listeners[0], listeners[1]];
-      emitter.removeListener(patterns[0], listeners[0]);
+      emitter._patternEvents[patterns[0]] = [listeners[0], listeners[1]];
+      emitter.removePatternListener(patterns[0], listeners[0]);
 
-      expect(emitter._events[patterns[0]][0]).to.be(listeners[1]);
+      expect(emitter._patternEvents[patterns[0]][0]).to.be(listeners[1]);
     });
 
     it('removes the regex if no other listeners exist for the pattern', function() {
-      emitter.removeListener(patterns[0], listeners[0]);
+      emitter.removePatternListener(patterns[0], listeners[0]);
 
       expect(emitter._regexes).not.to.have.key(patterns[0]);
       expect(emitter._regexes[patterns[1]]).to.be.a(RegExp);
     });
 
     it("doesn't modify the regex if other listeners exist for the pattern", function() {
-      emitter._events[patterns[0]] = [listeners[0], listeners[1]];
-      emitter.removeListener(patterns[0], listeners[0]);
+      emitter._patternEvents[patterns[0]] = [listeners[0], listeners[1]];
+      emitter.removePatternListener(patterns[0], listeners[0]);
 
       expect(emitter._regexes).to.have.key(patterns[0]);
     });
 
     it('returns the instance of PatternEmitter', function() {
-      var returned = emitter.removeListener(patterns[0], listeners[0]);
+      var returned = emitter.removePatternListener(patterns[0], listeners[0]);
 
       expect(returned).to.equal(emitter);
     });
   });
 
-  describe('prototype.removeAllListeners', function() {
+  describe('prototype.removeAllPatternListeners', function() {
     beforeEach(function() {
-      emitter._events['.*'] = [function() {}, function() {}];
+      emitter._patternEvents['.*'] = [function() {}, function() {}];
       emitter._regexes['.*'] = new RegExp('.*');
     });
 
     it('removes all listeners for a given pattern', function() {
-      emitter.removeAllListeners('.*');
+      emitter.removeAllPatternListeners('.*');
 
-      expect(emitter._events).not.to.have.key('.*');
+      expect(emitter._patternEvents).not.to.have.key('.*');
     });
 
     it('deletes the pattern from the _regexes property', function() {
-      emitter.removeAllListeners('.*');
+      emitter.removeAllPatternListeners('.*');
 
       expect(emitter._regexes).not.to.have.key('.*');
     });
 
     it('returns the instance of PatternEmitter', function() {
-      var returned = emitter.removeAllListeners('.*');
+      var returned = emitter.removeAllPatternListeners('.*');
 
       expect(returned).to.equal(emitter);
     });
   });
 
-  describe('prototype.listeners', function() {
+  describe('prototype.patternListeners', function() {
     it("throws a TypeError if pattern isn't a string", function() {
       var invalidCall = function() {
-        emitter.listeners(1);
+        emitter.patternListeners(1);
       };
 
       expect(invalidCall).to.throwException(function (e) {
@@ -327,11 +336,11 @@ describe('PatternEmitter', function() {
     });
 
     it('returns all listeners for the given pattern', function() {
-      emitter._events['.*'] = [function() {}, function() {}];
-      var result = emitter.listeners('.*');
+      emitter._patternEvents['.*'] = [function() {}, function() {}];
+      var result = emitter.patternListeners('.*');
 
-      expect(result[0]).to.be(emitter._events['.*'][0]);
-      expect(result[1]).to.be(emitter._events['.*'][1]);
+      expect(result[0]).to.be(emitter._patternEvents['.*'][0]);
+      expect(result[1]).to.be(emitter._patternEvents['.*'][1]);
     });
   });
 
@@ -354,10 +363,10 @@ describe('PatternEmitter', function() {
 
     it('returns an array with a single listener if only one matches', function() {
       var listener = function() {};
-      emitter._events['match'] = listener;
+      emitter._patternEvents['match'] = listener;
       emitter._regexes['match'] = new RegExp('match');
 
-      emitter._events['nonMatch'] = listener;
+      emitter._patternEvents['nonMatch'] = listener;
       emitter._regexes['nonMatch'] = new RegExp('nonMatch');
 
       var result = emitter.matchingListeners('match');
@@ -371,10 +380,10 @@ describe('PatternEmitter', function() {
       var listener2 = function() {};
       var listener3 = function() {};
 
-      emitter._events['test1'] = listener1;
+      emitter._patternEvents['test1'] = listener1;
       emitter._regexes['test1'] = new RegExp('test1');
 
-      emitter._events['test\\d'] = [listener2, listener3];
+      emitter._patternEvents['test\\d'] = [listener2, listener3];
       emitter._regexes['test\\d'] = new RegExp('test\\d');
 
       var result = emitter.matchingListeners('test1');
@@ -384,10 +393,10 @@ describe('PatternEmitter', function() {
     });
   });
 
-  describe('listenerCount', function() {
+  describe('patternListenerCount', function() {
     it("throws a TypeError if pattern isn't a string", function() {
       var invalidCall = function() {
-        PatternEmitter.listenerCount(1, function() {});
+        PatternEmitter.patternListenerCount(1, function() {});
       };
 
       expect(invalidCall).to.throwException(function (e) {
@@ -396,8 +405,8 @@ describe('PatternEmitter', function() {
     });
 
     it('returns the number of listeners for the pattern', function() {
-      emitter._events['.*'] = [function() {}, function() {}];
-      var result = PatternEmitter.listenerCount(emitter, '.*');
+      emitter._patternEvents['.*'] = [function() {}, function() {}];
+      var result = PatternEmitter.patternListenerCount(emitter, '.*');
 
       expect(result).to.be(2);
     });
@@ -415,10 +424,10 @@ describe('PatternEmitter', function() {
     });
 
     it('returns the number of matching listeners for the type', function() {
-      emitter.addListener('.*', function() {});
-      emitter.addListener('\\w', function() {});
-      emitter.addListener('\\w', function() {});
-      emitter.addListener('z', function() {});
+      emitter.addPatternListener('.*', function() {});
+      emitter.addPatternListener('\\w', function() {});
+      emitter.addPatternListener('\\w', function() {});
+      emitter.addPatternListener('z', function() {});
 
       var result = PatternEmitter.matchingListenerCount(emitter, 'test');
 
