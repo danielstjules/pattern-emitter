@@ -11,7 +11,7 @@ describe('PatternEmitter', function() {
 
   it("inherits EventEmitter's prototype", function() {
     var methods = ['addListener', 'removeListener', 'removeAllListeners',
-      'listeners', 'once'];
+      'listeners', 'once', 'setMaxListeners'];
 
     methods.forEach(function(method) {
       expect(PatternEmitter.prototype[method]).to.be(EventEmitter.prototype[method]);
@@ -37,16 +37,6 @@ describe('PatternEmitter', function() {
   });
 
   describe('prototype.emit', function() {
-    it("throws a TypeError if type isn't a string", function() {
-      var invalidCall = function() {
-        emitter.emit(1, 'test');
-      };
-
-      expect(invalidCall).to.throwException(function (e) {
-        expect(e).to.be.a(TypeError);
-      });
-    });
-
     it('returns false if no listeners match the event', function() {
       var invoked = false;
       emitter._patternEvents['^t.*'] = function() {
@@ -345,16 +335,6 @@ describe('PatternEmitter', function() {
   });
 
   describe('prototype.matchingListeners', function() {
-    it("throws a TypeError if type isn't a string", function() {
-      var invalidCall = function() {
-        emitter.matchingListeners(1);
-      };
-
-      expect(invalidCall).to.throwException(function (e) {
-        expect(e).to.be.a(TypeError);
-      });
-    });
-
     it('returns an empty array if no listeners match the event', function() {
       var result = emitter.matchingListeners('nonMatching');
 
