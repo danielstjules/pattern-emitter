@@ -402,4 +402,27 @@ describe('PatternEmitter', function() {
       expect(result).to.be(2);
     });
   });
+
+  describe('listenerCount', function() {
+    it("throws a TypeError if type isn't a string", function() {
+      var invalidCall = function() {
+        PatternEmitter.matchingListenerCount(1, function() {});
+      };
+
+      expect(invalidCall).to.throwException(function (e) {
+        expect(e).to.be.a(TypeError);
+      });
+    });
+
+    it('returns the number of matching listeners for the type', function() {
+      emitter.addListener('.*', function() {});
+      emitter.addListener('\\w', function() {});
+      emitter.addListener('\\w', function() {});
+      emitter.addListener('z', function() {});
+
+      var result = PatternEmitter.matchingListenerCount(emitter, 'test');
+
+      expect(result).to.be(3);
+    });
+  });
 });
