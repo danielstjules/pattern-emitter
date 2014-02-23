@@ -2,7 +2,6 @@ var expect = require('expect.js');
 var PatternEmitter = require('../lib/patternEmitter');
 
 describe('PatternEmitter', function() {
-
   var emitter;
 
   beforeEach(function() {
@@ -11,7 +10,7 @@ describe('PatternEmitter', function() {
 
   it("inherits EventEmitter's prototype as private methods", function() {
     var methods = ['_addListener', '_removeListener', 'removeAllListeners',
-      '_listeners'];
+      '_listeners', '_once'];
 
     methods.forEach(function(method) {
       expect(emitter[method]).to.be.a('function');
@@ -28,7 +27,7 @@ describe('PatternEmitter', function() {
     });
   });
 
-  describe('emit', function() {
+  describe('prototype.emit', function() {
     it("throws a TypeError if type isn't a string", function() {
       var invalidCall = function() {
         emitter.emit(1, 'test');
@@ -106,6 +105,47 @@ describe('PatternEmitter', function() {
 
       expect(x).to.be(2);
       expect(y).to.be(1);
+    });
+
+    it('can be called multiple times', function() {
+      var counter = 0;
+      var listener = function() {
+        counter++;
+      };
+
+      emitter._events['[t]'] = listener;
+      emitter._regexes['[t]'] = new RegExp('[t]');
+
+      emitter.emit('test');
+      expect(counter).to.be(1);
+      emitter.emit('test');
+      expect(counter).to.be(2);
+    });
+  });
+
+  describe('prototype.once', function() {
+    it("throws a TypeError if pattern isn't a string", function() {
+      var invalidCall = function() {
+        emitter.once(1, function() {});
+      };
+
+      expect(invalidCall).to.throwException(function (e) {
+        expect(e).to.be.a(TypeError);
+      });
+    });
+
+    it('adds a listener that can be invoked at most once', function() {
+      var counter = 0;
+      var listener = function() {
+        counter++;
+      };
+
+      emitter.once('[a-z]', listener);
+      emitter.emit('test');
+      emitter.emit('test');
+
+      expect(counter).to.be(1);
+      expect(emitter._events).not.to.have.key('[a-z]');
     });
   });
 
