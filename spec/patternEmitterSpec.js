@@ -34,26 +34,52 @@ describe('PatternEmitter', function() {
   describe('prototype.emit', function() {
     it('returns false if no listeners match the event', function() {
       var invoked = false;
-      var regex = /^t.*/;
 
-      emitter._patternEvents[String(regex)] = function() {
+      emitter.on(/^t.*/, function() {
         invoked = true;
-      };
-      emitter._regexes[String(regex)] = regex;
+      });
+
+      emitter.on('invalid', function() {
+        invoked = true;
+      });
+
       var result = emitter.emit('noMatch');
 
       expect(invoked).to.be(false);
       expect(result).to.be(false);
     });
 
+    it('returns true if a listener matches the event', function() {
+      emitter.on('test', function() {});
+      var result = emitter.emit('test');
+
+      expect(result).to.be(true);
+    });
+
+    it('returns true if a pattern listener matches the event', function() {
+      emitter.on(/^t.*/, function() {});
+      var result = emitter.emit('test');
+
+      expect(result).to.be(true);
+    });
+
+    it('invokes a listener when the event matches its type', function() {
+      var invoked = false;
+      emitter.on('test', function() {
+        invoked = true;
+      });
+
+      emitter.emit('test');
+
+      expect(invoked).to.be(true);
+    });
+
     it('invokes a listener when the event matches its pattern', function() {
       var invoked = false;
-      var regex = /^t.*/;
-
-      emitter._patternEvents[String(regex)] = function() {
+      emitter.on(/^t.*/, function() {
         invoked = true;
-      };
-      emitter._regexes[String(regex)] = regex;
+      });
+
       emitter.emit('test');
 
       expect(invoked).to.be(true);
@@ -61,12 +87,10 @@ describe('PatternEmitter', function() {
 
     it('invokes the listener with any additional arguments', function() {
       var args;
-      var regex = /^t\w{3}/;
-
-      emitter._patternEvents[String(regex)] = function(arg1, arg2, arg3) {
+      emitter.on(/^t\w{3}/, function(arg1, arg2, arg3) {
         args = [arg1, arg2, arg3];
-      };
-      emitter._regexes[String(regex)] = regex;
+      });
+
       emitter.emit('test', 'arg1', 'arg2', 'arg3');
 
       expect(args).to.eql(['arg1', 'arg2', 'arg3']);
@@ -74,12 +98,10 @@ describe('PatternEmitter', function() {
 
     it('adds an event property to the invoked listener', function() {
       var event;
-      var regex = /^\w{2}/;
-
-      emitter._patternEvents[String(regex)] = function() {
+      emitter.on(/^\w{2}/, function() {
         event = this.event;
-      };
-      emitter._regexes[String(regex)] = regex;
+      });
+
       emitter.emit('test');
 
       expect(event).to.eql('test');
@@ -88,6 +110,7 @@ describe('PatternEmitter', function() {
     it('invokes all matching listeners', function() {
       var x = 0;
       var y = 0;
+      var z = 0;
 
       var listener1 = function() {
         x++;
@@ -97,26 +120,30 @@ describe('PatternEmitter', function() {
         y++;
       };
 
-      emitter._patternEvents['^t.*'] = listener1;
-      emitter._regexes['^t.*'] = /^t.*/;
+      var listener3 = function() {
+        z++;
+      };
 
-      emitter._patternEvents['.*'] = [listener1, listener2];
-      emitter._regexes['.*'] = new RegExp('.*');
+      emitter.on(/t.*/, listener1);
+
+      emitter.on(/.*/, listener1);
+      emitter.on(/.*/, listener2);
+      emitter.on(/.*/, listener3);
+
+      emitter.on('test', listener3);
 
       emitter.emit('test');
 
       expect(x).to.be(2);
       expect(y).to.be(1);
+      expect(z).to.be(2);
     });
 
     it('can be called multiple times', function() {
       var counter = 0;
-      var listener = function() {
+      emitter.on(/[t]/, function() {
         counter++;
-      };
-
-      emitter._patternEvents['[t]'] = listener;
-      emitter._regexes['[t]'] = new RegExp('[t]');
+      });
 
       emitter.emit('test');
       expect(counter).to.be(1);
@@ -152,7 +179,26 @@ describe('PatternEmitter', function() {
       });
     });
 
-    it('adds the listener to the _patternEvents property', function() {
+    it("calls _addListener if type isn't a RegExp", function() {
+      var invoked = false;
+      emitter._addListener = function() {
+        invoked = true;
+      };
+
+      emitter.addListener('test', function() {});
+
+      expect(invoked).to.be(true);
+    });
+
+    it("adds the listener to _events if type isn't a RegExp", function() {
+      var listener = function() {};
+      emitter.addListener('test', listener);
+
+      expect(emitter._events).to.have.key('test');
+      expect(emitter._events['test']).to.be(listener);
+    });
+
+    it('adds a pattern listener to the _patternEvents property', function() {
       var regex = /test*/;
       var listener = function() {};
       emitter.addListener(regex, listener);
@@ -227,6 +273,32 @@ describe('PatternEmitter', function() {
       expect(invalidCall).to.throwException(function (e) {
         expect(e).to.be.a(TypeError);
       });
+    });
+
+    it("calls _removeListener if type isn't a RegExp", function() {
+      var invoked = false;
+      emitter._removeListener = function() {
+        invoked = true;
+      };
+
+      emitter.removeListener('test', function() {});
+
+      expect(invoked).to.be(true);
+    });
+
+    it("removes the listener from _events if type isn't a RegExp", function() {
+      var listener = function() {};
+      emitter.addListener('test', listener);
+      emitter.removeListener('test', listener);
+
+      expect(emitter._events).not.to.have.key('test');
+    });
+
+    it("doesn't remove pattern listeners given a string type", function() {
+      var key = String(/pattern1/);
+      emitter.removeListener(key, listeners[0]);
+
+      expect(emitter._patternEvents).to.have.key(key);
     });
 
     it('removes the listener from the _patternEvents property', function() {
@@ -333,21 +405,27 @@ describe('PatternEmitter', function() {
       expect(result).to.eql([listener]);
     });
 
-    it('returns an array with matching listeners across patterns', function() {
+    it('returns an array with matching listeners across patterns and type', function() {
       var listener1 = function() {};
       var listener2 = function() {};
       var listener3 = function() {};
+      var listener4 = function() {};
 
-      emitter._patternEvents['test1'] = listener1;
-      emitter._regexes['test1'] = new RegExp('test1');
+      var invalidListener1 = function() {};
+      var invalidListener2 = function() {};
 
-      emitter._patternEvents['test\\d'] = [listener2, listener3];
-      emitter._regexes['test\\d'] = new RegExp('test\\d');
+      emitter.on(new RegExp('test1'), listener1);
+      emitter.on(new RegExp('test\\d'), listener2);
+      emitter.on(new RegExp('test\\d'), listener3);
+      emitter.on('test1', listener4);
+
+      emitter.on(/testing/, invalidListener1);
+      emitter.on('test2', invalidListener2);
 
       var result = emitter.matchingListeners('test1');
 
-      expect(result).to.have.length(3);
-      expect(result).to.eql([listener1, listener2, listener3]);
+      expect(result).to.have.length(4);
+      expect(result).to.contain(listener1, listener2, listener3, listener4);
     });
   });
 
