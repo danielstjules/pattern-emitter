@@ -11,15 +11,15 @@ EventEmitter.
 * [Compatibility](#compatibility)
 * [Class: PatternEmitter](#class-patternemitter)
 * [Instance Methods](#instance-methods)
-    * [emitter.addListener(event|pattern, listener)](#emitteraddlistenereventpattern-listener)
+    * [emitter.addListener(event | pattern, listener)](#emitteraddlistenerevent--pattern-listener)
     * [emitter.emit(event, \[arg1\], \[arg2\], \[...\])](#emitteremitevent-91arg193-91arg293-9193)
     * [emitter.listeners(event)](#emitterlistenersevent)
     * [emitter.matchingListeners(pattern)](#emittermatchinglistenerspattern)
-    * [emitter.on(event|pattern, listener)](#emitteroneventpattern-listener)
-    * [emitter.once(event|pattern, listener)](#emitteronceeventpattern-listener)
+    * [emitter.on(event | pattern, listener)](#emitteronevent--pattern-listener)
+    * [emitter.once(event | pattern, listener)](#emitteronceevent--pattern-listener)
     * [emitter.patternListeners(pattern)](#emitterpatternlistenerspattern)
-    * [emitter.removeAllListeners(event|pattern)](#emitterremovealllistenerseventpattern)
-    * [emitter.removeListener(event|pattern, listener)](#emitterremovelistenereventpattern-listener)
+    * [emitter.removeAllListeners(event | pattern)](#emitterremovealllistenersevent--pattern)
+    * [emitter.removeListener(event | pattern, listener)](#emitterremovelistenerevent--pattern-listener)
     * [emitter.setMaxListeners(n)](#emittersetmaxlistenersn)
 * [Class Methods](#class-methods)
     * [PatternEmitter.listenerCount(emitter, event)](#patternemitterlistenercountemitter-event)
@@ -96,7 +96,7 @@ In the following examples, let `emitter` be an instance of `PatternEmitter`.
 Furthermore, let `pattern` refer to any instance of `RegExp`, and `event`
 all other values.
 
-#### emitter.addListener(event|pattern, listener)
+#### emitter.addListener(event | pattern, listener)
 
 Given a RegExp event type, stores the regular expression and registers the
 listener to any events matching the pattern. Otherwise, it behaves exactly
@@ -118,11 +118,11 @@ Returns an array of listeners for the given event.
 Returns an array of listeners for the supplied event type, and whose
 patterns match the event if given a string.
 
-#### emitter.on(event|pattern, listener)
+#### emitter.on(event | pattern, listener)
 
 An alias for addListener.
 
-#### emitter.once(event|pattern, listener)
+#### emitter.once(event | pattern, listener)
 
 Adds a one time listener for an event or pattern. The listener is invoked only
 once after an event is fired, after which it is removed.
@@ -131,14 +131,14 @@ once after an event is fired, after which it is removed.
 
 Returns an array of pattern listeners for the specified RegExp.
 
-#### emitter.removeAllListeners(event|pattern)
+#### emitter.removeAllListeners(event | pattern)
 
 Removes all listeners for the specified event type. If given an instance of
 RegExp, it matches the RegExp object with the same expression. Emits a
 'removeListener' event for each removed listener. Returns an instance of
 itself.
 
-#### emitter.removeListener(event|pattern, listener)
+#### emitter.removeListener(event | pattern, listener)
 
 Removes the listener from the specified event type. If given an instance of
 RegExp, it matches any RegExp object with the same expression. Emits a
