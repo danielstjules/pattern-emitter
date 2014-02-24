@@ -8,6 +8,7 @@ EventEmitter.
 
 * [Installation](#installation)
 * [Overview](#overview)
+* [Compatibility](#compatibility)
 
 ## Installation
 
@@ -22,10 +23,13 @@ You can also require it as a dependency in your `package.json` file:
 
 ## Overview
 
-The PatternEmitter class both extends and is 100% backwards compatible with
-EventEmitter. It simply exposes a new set of methods on top of the existing
-API for registering listeners to events matching patterns. As a result, using
-this library is as simple as replacing instances of:
+The PatternEmitter class both extends and is backwards compatible with
+EventEmitter when dealing with string event types. However, when registering
+a listener to a RegExp, it has the added benefit of listening to all events
+matching the expression, rather than that particular object. In addition, it
+exposes a new set of methods on top of the existing API for requesting details
+on those patterns and their listeners. As a result, using this library is as
+simple as replacing instances of:
 
 ```
 var Emitter = require('events').EventEmitter; // Node 0.10.x
@@ -37,3 +41,9 @@ with:
 ```
 var Emitter = require('pattern-emitter');
 ```
+
+## Compatibility
+
+The use of PatternEmitter is backwards compatible with EventEmitter for all
+who haven't been registering listeners to instances of `RegExp`. I suspect
+that this covers a great majority of event use.
