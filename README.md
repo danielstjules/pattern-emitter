@@ -9,7 +9,6 @@ EventEmitter.
 * [Installation](#installation)
 * [Overview](#overview)
 * [Compatibility](#compatibility)
-* [Performance](#performance)
 * [Class: PatternEmitter](#class-patternemitter)
 * [Instance Methods](#instance-methods)
     * [emitter.addListener(event | pattern, listener)](#emitteraddlistenerevent--pattern-listener)
@@ -26,6 +25,7 @@ EventEmitter.
     * [PatternEmitter.listenerCount(emitter, event)](#patternemitterlistenercountemitter-event)
     * [PatternEmitter.matchingListenerCount(emitter, event)](#patternemittermatchinglistenercountemitter-event)
     * [PatternEmitter.patternListenerCount(emitter, pattern)](#patternemitterpatternlistenercountemitter-pattern)
+* [Performance](#performance)
 
 ## Installation
 
@@ -78,29 +78,6 @@ console.log(result); // "It's that simple"
 The use of PatternEmitter is backwards compatible with EventEmitter for all
 who haven't been registering listeners to instances of `RegExp`. I suspect
 that this covers a great majority of event use.
-
-## Performance
-
-Despite the ease of replacing EventEmitter throughout your application, I
-wouldn't recommend it. There is a performance hit that must be taken into
-consideration for any event-heavy code. Due to PatternEmitter piggy backing off
-of EventEmitter's methods and private properties, it is slower. This was done
-in an attempt to prevent copying a majority of the source in
-`node/lib/events.js`. However, a rewrite may be done to reduce this performance
-gap.
-
-To illustrate, consider the performance difference between both modules when
-only registering to string events, no patterns:
-
-```
-$ node benchmarks/eventEmitting.js
-EventEmitter x 184,286 ops/sec ±0.78% (96 runs sampled)
-PatternEmitter x 92,760 ops/sec ±1.08% (93 runs sampled)
-```
-
-Each operation in the above benchmark is invoking 100 listeners: 10 for each
-of 10 different events. That is, 18,428,600 vs 9,276,000 invocations a second
-on my Macbook Air.
 
 ## Class: PatternEmitter
 
@@ -336,3 +313,40 @@ emitter.on(/foo/, function() {});
 
 PatternEmitter.patternListenerCount(emitter, /foo/); // 1
 ```
+
+## Performance
+
+Despite the ease of replacing EventEmitter throughout your application,
+performance should be considered for any event-heavy code. This implementation
+was done in an attempt to avoid copying a majority of the source in
+`node/lib/events.js`, which resulted in a couple otherwise unnecessary
+assignments when dealing with EventEmitter's default behaviour.
+
+To illustrate, consider the performance difference between both modules when
+only registering to string events, no regular expressions:
+
+```
+$ node benchmarks/eventEmitting.js
+EventEmitter x 207,619 ops/sec ±0.26% (101 runs sampled)
+PatternEmitter x 105,611 ops/sec ±0.24% (103 runs sampled)
+```
+
+Each operation in the above benchmark is invoking 100 listeners: 10 for each
+of 10 different events. That is, 20,761,900 vs 10,561,100 invocations a second
+on my Macbook Air. So while a performance drop, it may not be a problem for
+your average node instance.
+
+For testing PatternEmitter with its pattern matching behaviour, a second,
+and naive, benchmark currently exists. With 100 pattern listeners, 10 for each
+of 10 different patterns,
+[benchmarks/patternEmitting.js](https://github.com/danielstjules/pattern-emitter/blob/master/benchmarks/patternEmitting.js)
+can be used:
+
+```
+$ node benchmarks/patternEmitting.js
+PatternEmitter x 33,179 ops/sec ±0.26% (101 runs sampled)
+```
+
+Still, 3,317,900 invocations a second for simple, small regular expressions.
+Of course, your own numbers will vary depending on the complexity of the
+patterns.

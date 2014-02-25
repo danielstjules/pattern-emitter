@@ -44,4 +44,4 @@ suite.add('EventEmitter', function() {
 .on('cycle', function(event) {
   console.log(String(event.target));
 })
-.run({ 'async': true });
+.run();
