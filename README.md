@@ -243,7 +243,7 @@ Removes the listener from the specified event type. If given an instance of
 RegExp, it matches any RegExp object with the same expression. Emits a
 'removeListener' event on success. Returns an instance of itself.
 
-```
+``` javascript
 var listener = function() {
   // Example event listener
 };
