@@ -83,10 +83,11 @@ that this covers a great majority of event use.
 
 Despite the ease of replacing EventEmitter throughout your application, I
 wouldn't recommend it. There is a performance hit that must be taken into
-consideration. Due to PatternEmitter piggy backing off of EventEmitter's methods
-and private properties, it is much slower. This was done in an attempt to
-prevent copying a majority of the source in `node/lib/events.js`. However, a
-rewrite may be done to reduce this performance gap.
+consideration for any event-heavy code. Due to PatternEmitter piggy backing off
+of EventEmitter's methods and private properties, it is slower. This was done
+in an attempt to prevent copying a majority of the source in
+`node/lib/events.js`. However, a rewrite may be done to reduce this performance
+gap.
 
 To illustrate, consider the performance difference between both modules when
 only registering to string events, no patterns:
@@ -98,7 +99,8 @@ PatternEmitter x 92,760 ops/sec ±1.08% (93 runs sampled)
 ```
 
 Each operation in the above benchmark is invoking 100 listeners: 10 for each
-of 10 different events.
+of 10 different events. That is, 18,428,600 vs 9,276,000 invocations a second
+on my Macbook Air.
 
 ## Class: PatternEmitter
 
