@@ -1,3 +1,7 @@
+### 0.0.4 (2014-02-25)
+
+  * Small optimization for when only handling string events
+
 ### 0.0.3 (2014-02-24)
 
   * Added PatternEmitter.listenerCount

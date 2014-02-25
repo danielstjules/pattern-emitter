@@ -1,6 +1,6 @@
 {
     "name": "pattern-emitter",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "Event emitters with support for regular expressions",
     "keywords": ["pattern", "event", "emitter", "regular", "expression",
         "regex", "wild", "card"],
