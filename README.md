@@ -328,12 +328,12 @@ only registering to string events, no regular expressions. Running
 
 ```
 $ node benchmarks/eventEmitting.js
-EventEmitter x 207,619 ops/sec ±0.26% (101 runs sampled)
-PatternEmitter x 105,611 ops/sec ±0.24% (103 runs sampled)
+EventEmitter x 208,424 ops/sec ±0.28% (102 runs sampled)
+PatternEmitter x 164,004 ops/sec ±0.45% (101 runs sampled)
 ```
 
 Each operation in the above benchmark is invoking 100 listeners: 10 for each
-of 10 different events. That is, 20,761,900 vs 10,561,100 invocations a second
+of 10 different events. That is, 20,842,400 vs 16,400,400 invocations a second
 on my Macbook Air. So while a performance drop, it may not be a problem for
 your average node instance.
 
