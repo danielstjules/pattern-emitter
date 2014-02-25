@@ -336,8 +336,8 @@ of 10 different events. That is, 20,761,900 vs 10,561,100 invocations a second
 on my Macbook Air. So while a performance drop, it may not be a problem for
 your average node instance.
 
-For testing PatternEmitter with its pattern matching behaviour, a second,
-and naive, benchmark currently exists. With 100 pattern listeners, 10 for each
+For testing PatternEmitter with its pattern matching behaviour, a second
+naive benchmark currently exists. With 100 pattern listeners, 10 for each
 of 10 different patterns,
 [benchmarks/patternEmitting.js](https://github.com/danielstjules/pattern-emitter/blob/master/benchmarks/patternEmitting.js)
 can be used:
