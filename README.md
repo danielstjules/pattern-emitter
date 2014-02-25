@@ -320,7 +320,8 @@ Despite the ease of replacing EventEmitter throughout your application,
 performance should be considered for any event-heavy code. This implementation
 was done in an attempt to avoid copying a majority of the source in
 `node/lib/events.js`, which resulted in a couple otherwise unnecessary
-assignments when dealing with EventEmitter's default behaviour.
+assignments and function calls when dealing with EventEmitter's default
+behaviour.
 
 To illustrate, consider the performance difference between both modules when
 only registering to string events, no regular expressions. Running
