@@ -1,3 +1,8 @@
+### 0.0.3 (2014-02-24)
+
+  * Added PatternEmitter.listenerCount
+  * Added benchmarks/eventEmitting.js
+
 ### 0.0.2 (2014-02-23)
 
   * Simplified API, updated methods to use RegExp instances rather than
