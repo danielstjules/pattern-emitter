@@ -16,6 +16,9 @@
         "mocha": "*",
         "expect.js": "*"
     },
+    "devDependencies": {
+        "benchmark": "1.0.0"
+    },
     "scripts": {
         "test": "./node_modules/.bin/mocha -R spec spec"
     }

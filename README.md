@@ -9,6 +9,7 @@ EventEmitter.
 * [Installation](#installation)
 * [Overview](#overview)
 * [Compatibility](#compatibility)
+* [Performance](#performance)
 * [Class: PatternEmitter](#class-patternemitter)
 * [Instance Methods](#instance-methods)
     * [emitter.addListener(event | pattern, listener)](#emitteraddlistenerevent--pattern-listener)
@@ -77,6 +78,27 @@ console.log(result); // "It's that simple"
 The use of PatternEmitter is backwards compatible with EventEmitter for all
 who haven't been registering listeners to instances of `RegExp`. I suspect
 that this covers a great majority of event use.
+
+## Performance
+
+Despite the ease of replacing EventEmitter throughout your application, I
+wouldn't recommend it. There is a performance hit that must be taken into
+consideration. Due to PatternEmitter piggy backing off of EventEmitter's methods
+and private properties, it is much slower. This was done in an attempt to
+prevent copying a majority of the source in `node/lib/events.js`. However, a
+rewrite may be done to reduce this performance gap.
+
+To illustrate, consider the performance difference between both modules when
+only registering to string events, no patterns:
+
+```
+$ node benchmarks/eventEmitting.js
+EventEmitter x 184,286 ops/sec ±0.78% (96 runs sampled)
+PatternEmitter x 92,760 ops/sec ±1.08% (93 runs sampled)
+```
+
+Each operation in the above benchmark is invoking 100 listeners: 10 for each
+of 10 different events.
 
 ## Class: PatternEmitter
 
