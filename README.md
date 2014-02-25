@@ -323,7 +323,8 @@ was done in an attempt to avoid copying a majority of the source in
 assignments when dealing with EventEmitter's default behaviour.
 
 To illustrate, consider the performance difference between both modules when
-only registering to string events, no regular expressions:
+only registering to string events, no regular expressions. Running
+[benchmarks/eventEmitting.js](https://github.com/danielstjules/pattern-emitter/blob/master/benchmarks/eventEmitting.js):
 
 ```
 $ node benchmarks/eventEmitting.js
