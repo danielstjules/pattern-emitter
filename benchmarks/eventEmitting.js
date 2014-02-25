@@ -13,7 +13,7 @@ var patternEmitter = new PatternEmitter();
 
 var i, j;
 
-// Setup both emitters with 10 listeners on each of 100 events
+// Setup both emitters with 10 listeners on each of 10 events
 
 for (i = 0; i < 10; i++) {
   for (j = 0; j < 10; j++) {
