@@ -14,9 +14,7 @@
     },
     "devDependencies": {
         "mocha": "*",
-        "expect.js": "*"
-    },
-    "devDependencies": {
+        "expect.js": "*",
         "benchmark": "1.0.0"
     },
     "scripts": {
