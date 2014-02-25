@@ -450,6 +450,18 @@ describe('PatternEmitter', function() {
     });
   });
 
+  describe('listenerCount', function() {
+    it('returns the number of listeners for the event type', function() {
+      emitter.addListener('test', function() {});
+      emitter.addListener('test', function() {});
+      emitter.addListener(/test/, function() {});
+
+      var result = PatternEmitter.listenerCount(emitter, 'test');
+
+      expect(result).to.be(2);
+    });
+  });
+
   describe('matchingListenerCount', function() {
     it('returns the number of matching listeners for the type', function() {
       emitter.addListener(/.*/, function() {});
