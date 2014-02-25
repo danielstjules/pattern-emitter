@@ -316,6 +316,9 @@ PatternEmitter.patternListenerCount(emitter, /foo/); // 1
 
 ## Performance
 
+**TL;DR:** *Likely not an issue unless you're invoking in excess of 1,000,000
+listeners per second*
+
 Despite the ease of replacing EventEmitter throughout your application,
 performance should be considered for any event-heavy code. This implementation
 was done in an attempt to avoid copying a majority of the source in
