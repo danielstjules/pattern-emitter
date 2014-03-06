@@ -25,6 +25,9 @@ EventEmitter.
     * [PatternEmitter.listenerCount(emitter, event)](#patternemitterlistenercountemitter-event)
     * [PatternEmitter.matchingListenerCount(emitter, event)](#patternemittermatchinglistenercountemitter-event)
     * [PatternEmitter.patternListenerCount(emitter, pattern)](#patternemitterpatternlistenercountemitter-pattern)
+* [Events](#events)
+    * [newListener](#newlistener)
+    * [removeListener](#removelistener)
 * [Performance](#performance)
 
 ## Installation
@@ -312,6 +315,41 @@ emitter.on('foo', function() {});
 emitter.on(/foo/, function() {});
 
 PatternEmitter.patternListenerCount(emitter, /foo/); // 1
+```
+
+## Events
+
+Like EventEmitter, instances of PatternEmitter emit events both when listeners
+are added and removed. The events can be matched by pattern listeners, and as
+such will include the name/type as a property, accessible via `this.event`.
+
+#### newListener
+
+The event is emitted any time a new listener is added to the emitter. The event
+is emitted just prior to the listener being added, to prevent recursion.
+
+* `*` event | pattern
+* `function` listener
+
+``` javascript
+emitter.on(/Listener/, function(pattern, listener) {
+  // this.event will equal 'newListener' when a new listener is added
+});
+```
+
+#### removeListener
+
+The event is emitted any time an existing listener is removed from the emitter.
+The event is emitted just prior to the listener being removed, to prevent
+recursion.
+
+* `*` event | pattern
+* `function` listener
+
+``` javascript
+emitter.on('removeListener', function(event, listener) {
+  // invoked when a listener is removed
+});
 ```
 
 ## Performance
