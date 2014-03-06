@@ -12,7 +12,7 @@ EventEmitter.
 * [Class: PatternEmitter](#class-patternemitter)
 * [Instance Methods](#instance-methods)
     * [emitter.addListener(event | pattern, listener)](#emitteraddlistenerevent--pattern-listener)
-    * [emitter.emit(event, \[arg1\], \[arg2\], \[...\])](#emitteremitevent-91arg193-91arg293-9193)
+    * [emitter.emit(event, \[arg1\], \[arg2\], \[...\])](#emitteremitevent-arg1-arg2-)
     * [emitter.listeners(event)](#emitterlistenersevent)
     * [emitter.matchingListeners(event)](#emittermatchinglistenersevent)
     * [emitter.on(event | pattern, listener)](#emitteronevent--pattern-listener)
