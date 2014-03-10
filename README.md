@@ -37,7 +37,7 @@ You can also require it as a dependency in your `package.json` file:
 
 ```
 "dependencies": {
-    "pattern-emitter": ">0.0.0"
+    "pattern-emitter": "1.x.x"
 }
 ```
 
