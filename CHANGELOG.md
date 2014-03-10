@@ -1,3 +1,8 @@
+### 1.0.0 (2014-03-09)
+
+  * Stable release
+  * Small updates to documentation
+
 ### 0.0.4 (2014-02-25)
 
   * Small optimization for when only handling string events
